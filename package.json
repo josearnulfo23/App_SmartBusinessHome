@@ -1,7 +1,7 @@
 {
   "name": "smart-business-home",
-  "version": "2.1.0",
-  "description": "SmartBusinessHome v2.1 - Control financiero hogar con auth, analisis, admin, exports CSV/XLSX/PDF",
+  "version": "2.2.0",
+  "description": "SmartBusinessHome v2.2 DEPLOYED - Control financiero hogar con auth, analisis, admin, exports CSV/XLSX/PDF",
   "main": "electron/main.js",
   "scripts": {
     "start": "node src/main/app.js",
@@ -9,7 +9,9 @@
     "test": "node --test tests/**/*.js",
     "electron": "electron .",
     "build": "electron-builder --win --linux --mac",
-    "build:win": "electron-builder --win"
+    "build:win": "electron-builder --win",
+    "build:linux": "electron-builder --linux",
+    "build:mac": "electron-builder --mac"
   },
   "keywords": [
     "finanzas",
@@ -46,20 +48,32 @@
     },
     "win": {
       "target": "nsis",
-      "icon": "assets/images/icons/icon.png"
+      "icon": "assets/images/icons/icon.png",
+      "sign": null,
+      "signAndEditExecutable": false,
+      "verifyUpdateCodeSignature": false
     },
     "linux": {
-      "target": "AppImage",
-      "category": "Finance"
+      "target": [
+        "tar.gz",
+        "dir"
+      ],
+      "category": "Finance",
+      "icon": "assets/images/icons/icon.png"
     },
     "mac": {
-      "target": "dmg",
-      "category": "public.app-category.finance"
+      "target": [
+        "dmg",
+        "zip"
+      ],
+      "category": "public.app-category.finance",
+      "icon": "assets/images/icons/icon.png"
     },
     "nsis": {
       "oneClick": false,
       "allowToChangeInstallationDirectory": true
-    }
+    },
+    "forceCodeSigning": false
   },
   "allowScripts": {
     "electron@30.5.1": true

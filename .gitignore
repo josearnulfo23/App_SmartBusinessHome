@@ -16,3 +16,7 @@ dist/*.AppImage
 dist/*.dmg
 dist/*.zip
 dist/*.blockmap
+
+# releases instaladores — sí se versionan (ignorar solo dist binarios, no releases)
+!releases/
+!releases/**/*

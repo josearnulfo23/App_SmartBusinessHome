@@ -1,7 +1,7 @@
-// src/config/settings.js v2.1
+// src/config/settings.js v2.2 DEPLOYED
 module.exports = {
   appName: 'SmartBusinessHome',
-  version: '2.1.0',
+  version: '2.2.0',
   port: process.env.PORT || 3000,
   dataFile: 'financiero.db',
   backupEnabled: true,

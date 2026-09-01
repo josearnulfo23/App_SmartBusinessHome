@@ -2,6 +2,18 @@
 
 Formato [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/).
 
+## [2.2.0] - 2026-09-01 — DEPLOYED
+
+### Estado
+- **DEPLOYED** — Criterios de aceptación v2.2 al 100%. Persistencia SQLite verificada (financiero.db 72K intacto tras reinicios), 4 usuarios de prueba con datos aleatorios 6 meses.
+
+### Añadido
+- **Release v2.2:** `releases/Windows`, `releases/Linux`, `releases/Mac` con instaladores (nsis .exe, AppImage, dmg) generados vía `electron-builder`.
+- **Usuarios de prueba:** Ana/Ana123, Leo/Leo123, Patricia/Patricia123, Maikol/Maikol123 — 60 ingresos ($122M) + 99 gastos ($33M) + 24 presupuestos, verificados tras reinicio.
+
+### Cambiado
+- Versión `2.1.0` → `2.2.0` (`package.json`, `src/config/settings.js`, `README`, icono 512×512 + .ico multi-res).
+
 ## [2.1.0] - 2026-09-01
 
 ### Añadido
