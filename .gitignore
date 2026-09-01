@@ -1,0 +1,8 @@
+node_modules/
+data/database/financiero.json
+data/backups/
+data/exports/
+.env
+dist/
+.DS_Store
+*.log

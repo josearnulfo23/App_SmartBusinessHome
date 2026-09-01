@@ -1,0 +1,5 @@
+/* Temas */
+@media (prefers-color-scheme: dark) {
+  /* Mantener tema claro por defecto para legibilidad; tema oscuro opcional vía clase .dark */
+}
+.dark { --bg: #202124; --card: #303134; --text: #e8eaed; --muted: #9aa0a6; }
