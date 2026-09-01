@@ -1,46 +1,62 @@
-// src/controllers/presupuestoController.js
-const dataService = require('../services/dataService');
+// src/controllers/presupuestoController.js v2.0 - SQLite
+const { getDb } = require('../services/db');
 const { validarPresupuesto } = require('../services/validacionService');
-const { generarId } = require('../utils/helpers');
 
 function listar(req, res) {
-  const presupuestos = dataService.getCollection('presupuestos');
-  if (req.query.periodo) return res.json(presupuestos.filter(p => p.periodo === req.query.periodo));
-  res.json(presupuestos);
+  const db = getDb();
+  let rows;
+  if (req.query.periodo) {
+    rows = db.prepare('SELECT * FROM presupuestos WHERE usuario_id=? AND periodo=?').all(req.user.id, req.query.periodo);
+  } else {
+    rows = db.prepare('SELECT * FROM presupuestos WHERE usuario_id=? ORDER BY periodo DESC').all(req.user.id);
+  }
+  const mapped = rows.map(r => {
+    const cats = db.prepare('SELECT categoria, monto FROM presupuesto_categorias WHERE presupuesto_id=?').all(r.id);
+    const map = {}; cats.forEach(c => map[c.categoria]=c.monto);
+    return { id: String(r.id), periodo: r.periodo, presupuestoTotal: r.presupuesto_total, categoriasAsignadas: map, updatedAt: r.updated_at };
+  });
+  res.json(mapped);
 }
 function obtener(req, res) {
-  const presupuestos = dataService.getCollection('presupuestos');
-  const item = presupuestos.find(p => p.id === req.params.id || p.periodo === req.params.id);
-  if (!item) return res.status(404).json({ error: 'Presupuesto no encontrado' });
-  res.json(item);
+  const db = getDb();
+  let row = db.prepare('SELECT * FROM presupuestos WHERE (id=? OR periodo=?) AND usuario_id=?').get(req.params.id, req.params.id, req.user.id);
+  if (!row && /^\d{4}-\d{2}$/.test(req.params.id)) {
+    row = db.prepare('SELECT * FROM presupuestos WHERE periodo=? AND usuario_id=?').get(req.params.id, req.user.id);
+  }
+  if (!row) return res.status(404).json({ error: 'Presupuesto no encontrado' });
+  const cats = db.prepare('SELECT categoria, monto FROM presupuesto_categorias WHERE presupuesto_id=?').all(row.id);
+  const map = {}; cats.forEach(c=> map[c.categoria]=c.monto);
+  res.json({ id: String(row.id), periodo: row.periodo, presupuestoTotal: row.presupuesto_total, categoriasAsignadas: map, updatedAt: row.updated_at });
 }
 function crearOActualizar(req, res) {
   const errores = validarPresupuesto(req.body);
   if (errores.length) return res.status(400).json({ errores });
-  const data = dataService.loadData();
-  let idx = data.presupuestos.findIndex(p => p.periodo === req.body.periodo);
-  if (idx !== -1) {
-    data.presupuestos[idx] = { ...data.presupuestos[idx], presupuestoTotal: parseFloat(req.body.presupuestoTotal), categoriasAsignadas: req.body.categoriasAsignadas || {}, updatedAt: new Date().toISOString() };
-    dataService.saveData(data);
-    return res.json(data.presupuestos[idx]);
+  const db = getDb();
+  const existing = db.prepare('SELECT id FROM presupuestos WHERE periodo=? AND usuario_id=?').get(req.body.periodo, req.user.id);
+  if (existing) {
+    db.prepare("UPDATE presupuestos SET presupuesto_total=?, updated_at=datetime('now') WHERE id=?").run(parseFloat(req.body.presupuestoTotal)||0, existing.id);
+    db.prepare('DELETE FROM presupuesto_categorias WHERE presupuesto_id=?').run(existing.id);
+    for (const cat in (req.body.categoriasAsignadas||{})) {
+      const v = parseFloat(req.body.categoriasAsignadas[cat])||0;
+      if (v>0) db.prepare('INSERT INTO presupuesto_categorias (presupuesto_id, categoria, monto) VALUES (?,?,?)').run(existing.id, cat, v);
+    }
+    return obtener({ params:{id: String(existing.id)}, user: req.user }, res);
   }
-  const nuevo = {
-    id: generarId(),
-    periodo: req.body.periodo,
-    presupuestoTotal: parseFloat(req.body.presupuestoTotal) || 0,
-    categoriasAsignadas: req.body.categoriasAsignadas || {},
-    updatedAt: new Date().toISOString()
-  };
-  data.presupuestos.push(nuevo);
-  dataService.saveData(data);
-  res.status(201).json(nuevo);
+  const r = db.prepare('INSERT INTO presupuestos (periodo, presupuesto_total, usuario_id) VALUES (?,?,?)').run(req.body.periodo, parseFloat(req.body.presupuestoTotal)||0, req.user.id);
+  for (const cat in (req.body.categoriasAsignadas||{})) {
+    const v = parseFloat(req.body.categoriasAsignadas[cat])||0;
+    if (v>0) db.prepare('INSERT INTO presupuesto_categorias (presupuesto_id, categoria, monto) VALUES (?,?,?)').run(r.lastInsertRowid, cat, v);
+  }
+  const row = db.prepare('SELECT * FROM presupuestos WHERE id=?').get(r.lastInsertRowid);
+  const cats = db.prepare('SELECT categoria, monto FROM presupuesto_categorias WHERE presupuesto_id=?').all(row.id);
+  const map={}; cats.forEach(c=> map[c.categoria]=c.monto);
+  res.status(201).json({ id: String(row.id), periodo: row.periodo, presupuestoTotal: row.presupuesto_total, categoriasAsignadas: map, updatedAt: row.updated_at });
 }
 function eliminar(req, res) {
-  const data = dataService.loadData();
-  const idx = data.presupuestos.findIndex(p => p.id === req.params.id || p.periodo === req.params.id);
-  if (idx === -1) return res.status(404).json({ error: 'Presupuesto no encontrado' });
-  const removed = data.presupuestos.splice(idx, 1)[0];
-  dataService.saveData(data);
-  res.json(removed);
+  const db = getDb();
+  let row = db.prepare('SELECT id FROM presupuestos WHERE (id=? OR periodo=?) AND usuario_id=?').get(req.params.id, req.params.id, req.user.id);
+  if (!row) return res.status(404).json({ error: 'Presupuesto no encontrado' });
+  db.prepare('DELETE FROM presupuestos WHERE id=?').run(row.id);
+  res.json({ message: 'Presupuesto eliminado' });
 }
 module.exports = { listar, obtener, crearOActualizar, eliminar };

@@ -1,10 +1,10 @@
-// src/config/settings.js - Configuraciones generales
+// src/config/settings.js v2.1
 module.exports = {
   appName: 'SmartBusinessHome',
-  version: '1.0.0',
+  version: '2.1.0',
   port: process.env.PORT || 3000,
-  dataFile: 'financiero.json',
+  dataFile: 'financiero.db',
   backupEnabled: true,
-  backupIntervalMs: 24 * 60 * 60 * 1000,
+  backupIntervalMs: 24*60*60*1000,
   maxTransacciones: 10000
 };

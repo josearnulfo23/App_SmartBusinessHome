@@ -1,8 +1,18 @@
 node_modules/
+data/database/financiero.db
+data/database/financiero.db-wal
+data/database/financiero.db-shm
 data/database/financiero.json
-data/backups/
+data/database/financiero.json.migrated-*
+data/backups/*.db
+data/backups/*.json
 data/exports/
 .env
-dist/
 .DS_Store
 *.log
+# dist se versiona parcialmente (solo docs de build); binarios ignorados por patrón abajo
+dist/*.exe
+dist/*.AppImage
+dist/*.dmg
+dist/*.zip
+dist/*.blockmap

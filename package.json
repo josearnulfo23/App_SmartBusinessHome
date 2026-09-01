@@ -1,16 +1,67 @@
 {
   "name": "smart-business-home",
-  "version": "1.0.0",
-  "description": "Aplicación de escritorio para el control y seguimiento de las finanzas y gastos en los hogares",
-  "main": "src/main/app.js",
+  "version": "2.1.0",
+  "description": "SmartBusinessHome v2.1 - Control financiero hogar con auth, analisis, admin, exports CSV/XLSX/PDF",
+  "main": "electron/main.js",
   "scripts": {
     "start": "node src/main/app.js",
-    "test": "node --test tests/**/*.js"
+    "dev": "node src/main/app.js",
+    "test": "node --test tests/**/*.js",
+    "electron": "electron .",
+    "build": "electron-builder --win --linux --mac",
+    "build:win": "electron-builder --win"
   },
-  "keywords": ["finanzas", "hogar", "presupuesto", "desktop"],
+  "keywords": [
+    "finanzas",
+    "hogar",
+    "presupuesto",
+    "desktop"
+  ],
   "author": "José Arnulfo Céspedes Albornoz",
   "license": "OSL-3.0",
   "dependencies": {
-    "express": "^4.19.2"
+    "bcryptjs": "^2.4.3",
+    "exceljs": "^4.4.0",
+    "express": "^4.19.2",
+    "jsonwebtoken": "^9.0.2",
+    "pdfkit": "^0.20.2"
+  },
+  "devDependencies": {
+    "electron": "^30.0.0",
+    "electron-builder": "^24.13.3"
+  },
+  "build": {
+    "appId": "com.smartbusinesshome.app",
+    "productName": "SmartBusinessHome",
+    "files": [
+      "src/**/*",
+      "assets/**/*",
+      "data/**/*",
+      "electron/**/*",
+      "package.json"
+    ],
+    "directories": {
+      "buildResources": "assets",
+      "output": "dist"
+    },
+    "win": {
+      "target": "nsis",
+      "icon": "assets/images/icons/icon.png"
+    },
+    "linux": {
+      "target": "AppImage",
+      "category": "Finance"
+    },
+    "mac": {
+      "target": "dmg",
+      "category": "public.app-category.finance"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true
+    }
+  },
+  "allowScripts": {
+    "electron@30.5.1": true
   }
 }

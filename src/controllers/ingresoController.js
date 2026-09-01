@@ -1,61 +1,49 @@
-// src/controllers/ingresoController.js
-const dataService = require('../services/dataService');
+// src/controllers/ingresoController.js v2.0 - SQLite + usuario aislado
+const { getDb } = require('../services/db');
 const { validarIngreso } = require('../services/validacionService');
-const { generarId, filtrarPorPeriodo } = require('../utils/helpers');
 
 function listar(req, res) {
-  let ingresos = dataService.getCollection('ingresos');
-  if (req.query.periodo) ingresos = filtrarPorPeriodo(ingresos, req.query.periodo);
-  if (req.query.categoria) ingresos = ingresos.filter(i => i.categoria === req.query.categoria);
-  if (req.query.q) { const q = req.query.q.toLowerCase(); ingresos = ingresos.filter(i => (i.descripcion||'').toLowerCase().includes(q) || (i.fuente||'').toLowerCase().includes(q)); }
-  // ordenar por fecha desc
-  ingresos = [...ingresos].sort((a,b) => new Date(b.fecha) - new Date(a.fecha));
-  res.json(ingresos);
+  const db = getDb();
+  let sql = 'SELECT * FROM ingresos WHERE usuario_id = ?';
+  const params = [req.user.id];
+  if (req.query.periodo) { sql += ' AND fecha LIKE ?'; params.push(req.query.periodo + '%'); }
+  if (req.query.categoria) { sql += ' AND categoria = ?'; params.push(req.query.categoria); }
+  sql += ' ORDER BY fecha DESC, id DESC';
+  let rows = db.prepare(sql).all(...params);
+  if (req.query.q) { const q = req.query.q.toLowerCase(); rows = rows.filter(r => (r.descripcion||'').toLowerCase().includes(q) || (r.fuente||'').toLowerCase().includes(q)); }
+  res.json(rows.map(r => ({ id: String(r.id), monto: r.monto, fecha: r.fecha, categoria: r.categoria, fuente: r.fuente, descripcion: r.descripcion, createdAt: r.created_at })));
 }
-
 function obtener(req, res) {
-  const ingresos = dataService.getCollection('ingresos');
-  const item = ingresos.find(i => i.id === req.params.id);
-  if (!item) return res.status(404).json({ error: 'Ingreso no encontrado' });
-  res.json(item);
+  const db = getDb();
+  const row = db.prepare('SELECT * FROM ingresos WHERE id = ? AND usuario_id = ?').get(req.params.id, req.user.id);
+  if (!row) return res.status(404).json({ error: 'Ingreso no encontrado' });
+  res.json({ id: String(row.id), monto: row.monto, fecha: row.fecha, categoria: row.categoria, fuente: row.fuente, descripcion: row.descripcion, createdAt: row.created_at });
 }
-
 function crear(req, res) {
   const errores = validarIngreso(req.body);
   if (errores.length) return res.status(400).json({ errores });
-  const data = dataService.loadData();
-  const nuevo = {
-    id: generarId(),
-    monto: parseFloat(req.body.monto),
-    fecha: req.body.fecha,
-    categoria: req.body.categoria || 'Salario',
-    fuente: req.body.fuente || req.body.categoria || '',
-    descripcion: req.body.descripcion || '',
-    createdAt: new Date().toISOString()
-  };
-  data.ingresos.push(nuevo);
-  dataService.saveData(data);
-  res.status(201).json(nuevo);
+  const db = getDb();
+  const r = db.prepare('INSERT INTO ingresos (monto, fecha, categoria, fuente, descripcion, usuario_id) VALUES (?,?,?,?,?,?)')
+    .run(parseFloat(req.body.monto), req.body.fecha, req.body.categoria || 'Salario', req.body.fuente || req.body.categoria || '', req.body.descripcion || '', req.user.id);
+  const row = db.prepare('SELECT * FROM ingresos WHERE id = ?').get(r.lastInsertRowid);
+  res.status(201).json({ id: String(row.id), monto: row.monto, fecha: row.fecha, categoria: row.categoria, fuente: row.fuente, descripcion: row.descripcion, createdAt: row.created_at });
 }
-
 function actualizar(req, res) {
   const errores = validarIngreso(req.body);
   if (errores.length) return res.status(400).json({ errores });
-  const data = dataService.loadData();
-  const idx = data.ingresos.findIndex(i => i.id === req.params.id);
-  if (idx === -1) return res.status(404).json({ error: 'Ingreso no encontrado' });
-  data.ingresos[idx] = { ...data.ingresos[idx], monto: parseFloat(req.body.monto), fecha: req.body.fecha, categoria: req.body.categoria, fuente: req.body.fuente || req.body.categoria, descripcion: req.body.descripcion };
-  dataService.saveData(data);
-  res.json(data.ingresos[idx]);
+  const db = getDb();
+  const exists = db.prepare('SELECT id FROM ingresos WHERE id = ? AND usuario_id = ?').get(req.params.id, req.user.id);
+  if (!exists) return res.status(404).json({ error: 'Ingreso no encontrado' });
+  db.prepare('UPDATE ingresos SET monto=?, fecha=?, categoria=?, fuente=?, descripcion=? WHERE id=? AND usuario_id=?')
+    .run(parseFloat(req.body.monto), req.body.fecha, req.body.categoria, req.body.fuente || req.body.categoria, req.body.descripcion || '', req.params.id, req.user.id);
+  const row = db.prepare('SELECT * FROM ingresos WHERE id=?').get(req.params.id);
+  res.json({ id: String(row.id), monto: row.monto, fecha: row.fecha, categoria: row.categoria, fuente: row.fuente, descripcion: row.descripcion, createdAt: row.created_at });
 }
-
 function eliminar(req, res) {
-  const data = dataService.loadData();
-  const idx = data.ingresos.findIndex(i => i.id === req.params.id);
-  if (idx === -1) return res.status(404).json({ error: 'Ingreso no encontrado' });
-  const removed = data.ingresos.splice(idx, 1)[0];
-  dataService.saveData(data);
-  res.json(removed);
+  const db = getDb();
+  const row = db.prepare('SELECT * FROM ingresos WHERE id=? AND usuario_id=?').get(req.params.id, req.user.id);
+  if (!row) return res.status(404).json({ error: 'Ingreso no encontrado' });
+  db.prepare('DELETE FROM ingresos WHERE id=? AND usuario_id=?').run(req.params.id, req.user.id);
+  res.json({ id: String(row.id), monto: row.monto, fecha: row.fecha, categoria: row.categoria });
 }
-
 module.exports = { listar, obtener, crear, actualizar, eliminar };

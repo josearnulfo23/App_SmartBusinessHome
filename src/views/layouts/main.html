@@ -3,29 +3,34 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>SmartBusinessHome - Control Financiero del Hogar</title>
+<title>SmartBusinessHome v2 — Control Financiero del Hogar</title>
 <link rel="stylesheet" href="/assets/css/main.css">
 <link rel="stylesheet" href="/assets/css/components.css">
 <link rel="stylesheet" href="/assets/css/themes.css">
 </head>
 <body>
 <header>
-  <h1>🏠 SmartBusinessHome <small style="font-weight:400;font-size:0.8rem;opacity:0.85">v1.0</small></h1>
-  <nav>
+  <h1 class="anim-title">🏠 SmartBusinessHome <small style="font-weight:400;font-size:0.8rem;opacity:0.85">v2.0</small></h1>
+  <nav id="mainNav">
     <a href="#" onclick="showTab('view-balance');return false">Balance</a>
     <a href="#" onclick="showTab('view-ingresos');return false">Ingresos</a>
     <a href="#" onclick="showTab('view-gastos');return false">Gastos</a>
     <a href="#" onclick="showTab('view-presupuesto');return false">Presupuesto</a>
     <a href="#" onclick="showTab('view-categorias-reporte');return false">Categorías</a>
     <a href="#" onclick="showTab('view-historico');return false">Histórico</a>
+    <a href="#" onclick="showTab('view-analisis');return false">📊 Análisis</a>
     <a href="#" onclick="showTab('view-alertas');return false">Alertas</a>
-    <a href="#" onclick="showTab('view-config');return false">Configuración</a>
+    <a href="#" onclick="showTab('view-config');return false">Config</a>
+    <a href="#" id="navAdmin" onclick="showTab('view-admin');return false" style="display:none;background:rgba(255,255,255,0.18);padding:0.25rem 0.6rem;border-radius:20px">👑 Admin</a>
   </nav>
+  <div style="display:flex;align-items:center;gap:0.6rem">
+    <span id="userBadge" style="font-size:0.85rem;opacity:0.9"></span>
+    <button class="btn btn-secondary" style="padding:0.35rem 0.7rem;font-size:0.8rem" onclick="logout()">Salir</button>
+  </div>
 </header>
 
 <div class="container">
 
-  <!-- Tabs -->
   <div class="tabs">
     <button class="tab active" data-tab="view-balance" onclick="showTab('view-balance')">📊 Balance</button>
     <button class="tab" data-tab="view-ingresos" onclick="showTab('view-ingresos')">💰 Ingresos</button>
@@ -33,31 +38,32 @@
     <button class="tab" data-tab="view-presupuesto" onclick="showTab('view-presupuesto')">📋 Presupuesto</button>
     <button class="tab" data-tab="view-categorias-reporte" onclick="showTab('view-categorias-reporte')">📈 Categorías</button>
     <button class="tab" data-tab="view-historico" onclick="showTab('view-historico')">🗓 Histórico</button>
+    <button class="tab" data-tab="view-analisis" onclick="showTab('view-analisis')">🔍 Análisis</button>
     <button class="tab" data-tab="view-alertas" onclick="showTab('view-alertas')">🔔 Alertas</button>
     <button class="tab" data-tab="view-config" onclick="showTab('view-config')">⚙️ Config</button>
+    <button class="tab" id="tabAdmin" data-tab="view-admin" onclick="showTab('view-admin')" style="display:none">👑 Admin</button>
   </div>
 
-  <!-- Periodo selector global -->
   <div class="card" style="display:flex;gap:1rem;align-items:center;flex-wrap:wrap">
     <label><strong>Periodo:</strong> <input type="month" id="periodoGlobal"></label>
     <button class="btn btn-secondary" onclick="cambiarPeriodo()">Actualizar</button>
     <span id="estadoPeriodo" style="color:var(--muted);font-size:0.9rem"></span>
   </div>
 
-  <!-- VIEW: BALANCE -->
+  <!-- BALANCE -->
   <section id="view-balance" class="view-section">
     <div class="grid">
       <div class="card kpi ingresos"><div class="label">Total Ingresos</div><div class="value" id="kpiIngresos">$0</div></div>
       <div class="card kpi gastos"><div class="label">Total Gastos</div><div class="value" id="kpiGastos">$0</div></div>
-      <div class="card kpi saldo" id="kpiSaldoCard"><div class="label">Saldo (Superávit / Déficit)</div><div class="value" id="kpiSaldo">$0</div><div id="kpiEstado" style="font-size:0.85rem;margin-top:0.3rem"></div></div>
+      <div class="card kpi saldo" id="kpiSaldoCard"><div class="label">Saldo</div><div class="value" id="kpiSaldo">$0</div><div id="kpiEstado" style="font-size:0.85rem;margin-top:0.3rem"></div></div>
     </div>
     <div class="card">
-      <h2>Resumen del periodo</h2>
+      <h2 class="anim-title">Resumen del periodo</h2>
       <p id="resumenTexto" style="color:var(--muted)"></p>
       <div style="margin-top:1rem;display:flex;gap:0.5rem;flex-wrap:wrap">
         <button class="btn btn-primary" onclick="showTab('view-ingresos')">Registrar ingreso</button>
         <button class="btn btn-primary" onclick="showTab('view-gastos')">Registrar gasto</button>
-        <button class="btn btn-secondary" onclick="showTab('view-categorias-reporte')">Ver categorías</button>
+        <button class="btn btn-secondary" onclick="showTab('view-analisis')">Ver análisis</button>
       </div>
     </div>
     <div class="card">
@@ -66,10 +72,10 @@
     </div>
   </section>
 
-  <!-- VIEW: INGRESOS -->
+  <!-- INGRESOS -->
   <section id="view-ingresos" class="view-section hidden">
     <div class="card">
-      <h2>Registrar ingreso</h2>
+      <h2 class="anim-title">Registrar ingreso</h2>
       <form id="formIngreso" onsubmit="guardarIngreso(event)">
         <input type="hidden" id="ingresoId">
         <div class="form-row">
@@ -88,17 +94,17 @@
     <div class="card">
       <h2>Listado de ingresos <span id="totalIngresosList" style="font-weight:400;color:var(--muted)"></span></h2>
       <div style="display:flex;gap:0.5rem;margin-bottom:0.8rem;flex-wrap:wrap">
-        <input type="text" id="filtroIngreso" placeholder="Buscar por descripción o fuente..." oninput="cargarIngresos()" style="flex:1;padding:0.5rem;border:1px solid #dadce0;border-radius:8px">
+        <input type="text" id="filtroIngreso" placeholder="Buscar..." oninput="cargarIngresos()" style="flex:1;padding:0.5rem;border:1px solid #dadce0;border-radius:8px">
         <select id="filtroCatIngreso" onchange="cargarIngresos()" style="padding:0.5rem;border-radius:8px;border:1px solid #dadce0"></select>
       </div>
       <table id="tablaIngresos"><thead><tr><th>Fecha</th><th>Categoría</th><th>Fuente</th><th>Descripción</th><th style="text-align:right">Monto</th><th>Acciones</th></tr></thead><tbody></tbody></table>
     </div>
   </section>
 
-  <!-- VIEW: GASTOS -->
+  <!-- GASTOS -->
   <section id="view-gastos" class="view-section hidden">
     <div class="card">
-      <h2>Registrar gasto</h2>
+      <h2 class="anim-title">Registrar gasto</h2>
       <form id="formGasto" onsubmit="guardarGasto(event)">
         <input type="hidden" id="gastoId">
         <div class="form-row">
@@ -116,17 +122,17 @@
     <div class="card">
       <h2>Listado de gastos <span id="totalGastosList" style="font-weight:400;color:var(--muted)"></span></h2>
       <div style="display:flex;gap:0.5rem;margin-bottom:0.8rem;flex-wrap:wrap">
-        <input type="text" id="filtroGasto" placeholder="Buscar por descripción..." oninput="cargarGastos()" style="flex:1;padding:0.5rem;border:1px solid #dadce0;border-radius:8px">
+        <input type="text" id="filtroGasto" placeholder="Buscar..." oninput="cargarGastos()" style="flex:1;padding:0.5rem;border:1px solid #dadce0;border-radius:8px">
         <select id="filtroCatGasto" onchange="cargarGastos()" style="padding:0.5rem;border-radius:8px;border:1px solid #dadce0"></select>
       </div>
       <table id="tablaGastos"><thead><tr><th>Fecha</th><th>Categoría</th><th>Descripción</th><th style="text-align:right">Monto</th><th>Acciones</th></tr></thead><tbody></tbody></table>
     </div>
   </section>
 
-  <!-- VIEW: PRESUPUESTO -->
+  <!-- PRESUPUESTO -->
   <section id="view-presupuesto" class="view-section hidden">
     <div class="card">
-      <h2>Configurar presupuesto mensual</h2>
+      <h2 class="anim-title">Configurar presupuesto mensual</h2>
       <div class="form-row">
         <div class="form-group"><label>Presupuesto total mensual *</label><input type="number" id="presupuestoTotal" step="0.01" min="0" placeholder="Ej: 3000000"></div>
         <div class="form-group"><label>Periodo</label><input type="month" id="presupuestoPeriodo"></div>
@@ -141,13 +147,13 @@
     </div>
   </section>
 
-  <!-- VIEW: CATEGORIAS REPORTE -->
+  <!-- CATEGORIAS REPORTE -->
   <section id="view-categorias-reporte" class="view-section hidden">
     <div class="card">
-      <h2>Análisis por categorías</h2>
+      <h2 class="anim-title">Análisis por categorías (periodo actual)</h2>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem">
-        <div><h3 style="font-size:0.95rem;margin-bottom:0.5rem">Distribución de gastos</h3><canvas id="pieChart" width="300" height="300"></canvas></div>
-        <div><h3 style="font-size:0.95rem;margin-bottom:0.5rem">Presupuesto vs Ejecutado</h3><canvas id="barChart" width="400" height="300"></canvas></div>
+        <div><h3 style="font-size:0.95rem;margin-bottom:0.5rem">Distribución de gastos</h3><canvas id="pieChart" width="360" height="320"></canvas></div>
+        <div><h3 style="font-size:0.95rem;margin-bottom:0.5rem">Presupuesto vs Ejecutado</h3><canvas id="barChart" width="420" height="320"></canvas></div>
       </div>
     </div>
     <div class="card">
@@ -165,10 +171,10 @@
     </div>
   </section>
 
-  <!-- VIEW: HISTORICO -->
+  <!-- HISTORICO -->
   <section id="view-historico" class="view-section hidden">
     <div class="card">
-      <h2>Consulta histórica</h2>
+      <h2 class="anim-title">Consulta histórica</h2>
       <div style="display:flex;gap:0.5rem;flex-wrap:wrap;align-items:end">
         <div class="form-group"><label>Periodo</label><input type="month" id="histPeriodo"></div>
         <div class="form-group"><label>Comparar con</label><input type="month" id="histComparar"></div>
@@ -182,332 +188,491 @@
     </div>
   </section>
 
-  <!-- VIEW: ALERTAS -->
+  <!-- ANALISIS NUEVO -->
+  <section id="view-analisis" class="view-section hidden">
+    <div class="card">
+      <h2 class="anim-title">🔍 Análisis Financiero — Ingresos y Gastos separados</h2>
+      <p style="color:var(--muted);font-size:0.9rem">Filtra por rango, categoría y ajusta la visualización con los controles.</p>
+      <div class="filter-bar" style="margin-top:1rem">
+        <div class="form-group"><label>Desde</label><input type="month" id="analDesde"></div>
+        <div class="form-group"><label>Hasta</label><input type="month" id="analHasta"></div>
+        <div class="form-group"><label>Categoría</label><select id="analCategoria"><option value="">Todas</option></select></div>
+        <div class="form-group"><label>Vista</label><select id="analVista" onchange="cargarAnalisis()"><option value="todo">Todo</option><option value="ingresos">Solo ingresos</option><option value="gastos">Solo gastos</option></select></div>
+        <button class="btn btn-primary" onclick="cargarAnalisis()">Aplicar</button>
+        <button class="btn btn-secondary" onclick="resetAnalisis()">Limpiar</button>
+      </div>
+      <div style="display:flex;gap:1rem;flex-wrap:wrap;align-items:center;margin-top:0.8rem">
+        <label style="font-size:0.85rem;display:flex;align-items:center;gap:0.4rem">Zoom <input type="range" id="analZoom" min="0.7" max="1.6" step="0.1" value="1" oninput="ajustarZoom(this.value)"></label>
+        <label style="font-size:0.85rem;display:flex;align-items:center;gap:0.4rem"><input type="checkbox" id="analAnim" checked> Animación</label>
+        <span id="analResumen" style="color:var(--muted);font-size:0.85rem"></span>
+      </div>
+    </div>
+
+    <!-- KPIs análisis -->
+    <div class="grid" id="analKpis" style="margin-bottom:1rem">
+      <div class="card kpi ingresos"><div class="label">Ingresos (rango)</div><div class="value" id="analIngresos">$0</div></div>
+      <div class="card kpi gastos"><div class="label">Gastos (rango)</div><div class="value" id="analGastos">$0</div></div>
+      <div class="card kpi saldo" id="analSaldoCard"><div class="label">Saldo</div><div class="value" id="analSaldo">$0</div></div>
+    </div>
+
+    <!-- Sección Ingresos -->
+    <div class="card" id="analIngresosSection">
+      <h2 style="color:var(--success)">💰 Ingresos — Comportamiento</h2>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem">
+        <div><h3 style="font-size:0.9rem;margin-bottom:0.4rem">Barras — Ingresos por categoría</h3><canvas id="analBarIngresos" width="420" height="300"></canvas></div>
+        <div><h3 style="font-size:0.9rem;margin-bottom:0.4rem">Torta — Distribución ingresos</h3><canvas id="analPieIngresos" width="360" height="300"></canvas></div>
+      </div>
+      <div style="margin-top:1rem"><h3 style="font-size:0.9rem;margin-bottom:0.4rem">Línea — Ingresos mensuales</h3><canvas id="analLineIngresos" width="900" height="260"></canvas></div>
+    </div>
+
+    <!-- Sección Gastos -->
+    <div class="card" id="analGastosSection">
+      <h2 style="color:var(--danger)">💸 Gastos — Comportamiento</h2>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem">
+        <div><h3 style="font-size:0.9rem;margin-bottom:0.4rem">Barras — Gastos por categoría</h3><canvas id="analBarGastos" width="420" height="300"></canvas></div>
+        <div><h3 style="font-size:0.9rem;margin-bottom:0.4rem">Torta — Distribución gastos</h3><canvas id="analPieGastos" width="360" height="300"></canvas></div>
+      </div>
+      <div style="margin-top:1rem"><h3 style="font-size:0.9rem;margin-bottom:0.4rem">Línea — Gastos mensuales</h3><canvas id="analLineGastos" width="900" height="260"></canvas></div>
+    </div>
+
+    <!-- Comparativo -->
+    <div class="card">
+      <h2>📈 Comparativo mensual — Ingresos vs Gastos</h2>
+      <canvas id="analLineComparativo" width="900" height="300"></canvas>
+      <div style="margin-top:0.8rem"><h3 style="font-size:0.9rem">Barras comparativas</h3><canvas id="analBarComparativo" width="900" height="300"></canvas></div>
+    </div>
+  </section>
+
+  <!-- ALERTAS -->
   <section id="view-alertas" class="view-section hidden">
     <div class="card">
-      <h2>Alertas de presupuesto</h2>
-      <p style="color:var(--muted);font-size:0.9rem">Se genera advertencia al 80% y alerta al 100% del presupuesto por categoría.</p>
+      <h2 class="anim-title">Alertas de presupuesto</h2>
+      <p style="color:var(--muted);font-size:0.9rem">Advertencia al 80% y alerta al 100% del presupuesto por categoría.</p>
       <div id="listaAlertas" style="margin-top:1rem"></div>
     </div>
   </section>
 
-  <!-- VIEW: CONFIG -->
+  <!-- CONFIG -->
   <section id="view-config" class="view-section hidden">
     <div class="card">
-      <h2>Gestión de datos</h2>
+      <h2 class="anim-title">Gestión de datos</h2>
       <div style="display:flex;gap:0.5rem;flex-wrap:wrap">
-        <button class="btn btn-secondary" onclick="exportar('ingresos')">Exportar ingresos CSV</button>
-        <button class="btn btn-secondary" onclick="exportar('gastos')">Exportar gastos CSV</button>
-        <button class="btn btn-secondary" onclick="exportar('presupuestos')">Exportar presupuestos CSV</button>
+        <button class="btn btn-secondary" onclick="exportar('csv')">📄 Descargar CSV</button>
+        <button class="btn btn-secondary" onclick="exportar('xlsx')">📊 Descargar XLSX</button>
+        <button class="btn btn-secondary" onclick="exportar('pdf')">📑 Descargar PDF</button>
         <button class="btn btn-primary" onclick="hacerBackup()">Crear respaldo</button>
       </div>
       <p id="msgConfig" style="margin-top:0.8rem;color:var(--success)"></p>
+      <p style="color:var(--muted);font-size:0.8rem;margin-top:0.5rem">CSV, XLSX y PDF incluyen ingresos, gastos y presupuestos del usuario actual.</p>
+    </div>
+    <div class="card">
+      <h2>Cambiar clave</h2>
+      <form onsubmit="cambiarClave(event)" style="max-width:400px">
+        <div class="form-group"><label>Clave actual</label><input type="password" id="claveActual" required></div>
+        <div class="form-group"><label>Nueva clave (mín 6, 1 mayúscula y 1 número)</label><input type="password" id="claveNueva" required></div>
+        <button type="submit" class="btn btn-primary">Actualizar clave</button>
+        <span id="msgClave" style="margin-left:0.6rem"></span>
+      </form>
+    </div>
+    <div class="card">
+      <h2>Personalización</h2>
+      <div class="form-row" style="max-width:500px">
+        <div class="form-group"><label>Tema</label><select id="cfgTema" onchange="aplicarTema(this.value)"><option value="claro">Claro</option><option value="oscuro">Oscuro</option></select></div>
+        <div class="form-group"><label>Color primario</label><input type="color" id="cfgColorPrimario" value="#1a73e8" onchange="aplicarColorPrimario(this.value)"></div>
+      </div>
+      <p style="color:var(--muted);font-size:0.8rem">Los cambios se aplican al instante. El admin puede guardarlos como preferencia global.</p>
     </div>
     <div class="card">
       <h2>Acerca de</h2>
-      <p><strong>SmartBusinessHome v1.0</strong> — Control financiero del hogar.</p>
-      <p style="color:var(--muted)">Autor: José Arnulfo Céspedes Albornoz</p>
-      <p style="color:var(--muted)">Licencia: OSL-3.0</p>
-      <p style="color:var(--muted)">Stack: Node.js + Express + JSON local</p>
+      <p><strong>SmartBusinessHome v2.0</strong> — Control financiero del hogar.</p>
+      <p style="color:var(--muted)">Autor: José Arnulfo Céspedes Albornoz — Licencia: OSL-3.0</p>
+      <p style="color:var(--muted)">Stack: Node.js + Express + SQLite + Electron</p>
+    </div>
+  </section>
+
+  <!-- ADMIN -->
+  <section id="view-admin" class="view-section hidden">
+    <div class="card">
+      <h2 class="anim-title">👑 Administración — Solo administradores</h2>
+      <p style="color:var(--muted)">Gestión de usuarios, privilegios, backups y personalización global.</p>
     </div>
     <div class="card">
-      <h2>Ayuda</h2>
-      <ul style="margin-left:1.2rem;color:var(--muted)">
-        <li>Registra ingresos y gastos desde sus pestañas respectivas.</li>
-        <li>Configura el presupuesto mensual por categorías.</li>
-        <li>Consulta el balance y las alertas para controlar tu salud financiera.</li>
-        <li>Usa Histórico para comparar meses.</li>
-        <li>Exporta tus datos a CSV desde Configuración.</li>
-      </ul>
+      <h2>Usuarios</h2>
+      <form onsubmit="adminCrearUsuario(event)" style="display:flex;gap:0.5rem;flex-wrap:wrap;align-items:end;margin-bottom:1rem">
+        <div class="form-group"><label>Usuario</label><input type="text" id="adminUser" required></div>
+        <div class="form-group"><label>Nombre</label><input type="text" id="adminDisplay" placeholder="Opcional"></div>
+        <div class="form-group"><label>Clave</label><input type="password" id="adminPass" required placeholder="Admin123!"></div>
+        <div class="form-group"><label>Rol</label><select id="adminRole"><option value="user">user</option><option value="admin">admin</option></select></div>
+        <button type="submit" class="btn btn-primary">Crear</button>
+      </form>
+      <table id="tablaAdminUsuarios"><thead><tr><th>ID</th><th>Usuario</th><th>Nombre</th><th>Rol</th><th>Acciones</th></tr></thead><tbody></tbody></table>
+      <p id="msgAdmin" style="margin-top:0.6rem"></p>
+    </div>
+    <div class="card">
+      <h2>Backups</h2>
+      <button class="btn btn-primary" onclick="adminCrearBackup()">Crear backup ahora</button>
+      <table id="tablaBackups" style="margin-top:1rem"><thead><tr><th>Archivo</th><th>Fecha</th></tr></thead><tbody></tbody></table>
+    </div>
+    <div class="card">
+      <h2>Personalización global</h2>
+      <div class="form-row" style="max-width:600px">
+        <div class="form-group"><label>Tema global</label><select id="adminTema"><option value="claro">Claro</option><option value="oscuro">Oscuro</option></select></div>
+        <div class="form-group"><label>Color primario global</label><input type="color" id="adminColor" value="#1a73e8"></div>
+        <div class="form-group"><label>Color fondo global</label><input type="color" id="adminFondo" value="#f5f7fa"></div>
+      </div>
+      <button class="btn btn-primary" onclick="adminGuardarConfig()">Guardar personalización</button>
+      <span id="msgAdminConfig" style="margin-left:0.6rem;color:var(--success)"></span>
     </div>
   </section>
 
 </div>
 
-<footer>SmartBusinessHome © 2026 — Hecho con 💙 para el hogar</footer>
+<footer>SmartBusinessHome v2.0 © 2026 — Hecho con 💙 para el hogar</footer>
 
 <script src="/assets/js/ui.js"></script>
 <script src="/assets/js/charts.js"></script>
 <script>
-// ===== Estado global =====
-function getPeriodo() { return document.getElementById('periodoGlobal').value || new Date().toISOString().slice(0,7); }
-function cambiarPeriodo() { cargarBalance(); }
+// ===== Auth guard =====
+function getToken(){ return localStorage.getItem('sbh_token'); }
+function authHeaders(){ const t=getToken(); return t ? { 'Authorization':'Bearer '+t, 'Content-Type':'application/json' } : { 'Content-Type':'application/json' }; }
+function requireLogin(){
+  const t=getToken();
+  if(!t){ location.href='/login'; return false; }
+  return true;
+}
+function logout(){ localStorage.removeItem('sbh_token'); localStorage.removeItem('sbh_user'); location.href='/login'; }
+let currentUser=null;
+async function checkAuth(){
+  if(!requireLogin()) return;
+  try{
+    const r=await fetch('/api/auth/me',{ headers: authHeaders() });
+    if(!r.ok) throw new Error('No autenticado');
+    currentUser=await r.json();
+    document.getElementById('userBadge').textContent = currentUser.displayName + ' ('+currentUser.role+')';
+    const isAdmin = currentUser.role==='admin';
+    document.getElementById('navAdmin').style.display = isAdmin?'inline-block':'none';
+    document.getElementById('tabAdmin').style.display = isAdmin?'inline-block':'none';
+  }catch(e){ logout(); }
+}
 
-document.addEventListener('DOMContentLoaded', () => {
-  const now = new Date().toISOString().slice(0,7);
-  document.getElementById('periodoGlobal').value = now;
-  document.getElementById('presupuestoPeriodo').value = now;
-  document.getElementById('histPeriodo').value = now;
-  const today = new Date().toISOString().split('T')[0];
-  document.getElementById('ingresoFecha').value = today;
-  document.getElementById('gastoFecha').value = today;
+function getPeriodo(){ return document.getElementById('periodoGlobal').value || new Date().toISOString().slice(0,7); }
+function cambiarPeriodo(){ cargarBalance(); }
+function ajustarZoom(v){ document.querySelectorAll('#view-analisis canvas').forEach(c=> c.style.transform='scale('+v+')'); }
+
+document.addEventListener('DOMContentLoaded', async ()=>{
+  await checkAuth();
+  // tema desde app-config
+  try{
+    const cfg=await fetch('/api/app-config').then(r=>r.json());
+    if(cfg.tema==='oscuro') document.body.classList.add('dark');
+    if(cfg.colorPrimario) document.documentElement.style.setProperty('--primary', cfg.colorPrimario);
+    if(cfg.colorFondo) document.documentElement.style.setProperty('--bg', cfg.colorFondo);
+    const sel=document.getElementById('cfgTema'); if(sel) sel.value=cfg.tema||'claro';
+  }catch(e){}
+  const now=new Date().toISOString().slice(0,7);
+  document.getElementById('periodoGlobal').value=now;
+  document.getElementById('presupuestoPeriodo').value=now;
+  document.getElementById('histPeriodo').value=now;
+  const today=new Date().toISOString().split('T')[0];
+  document.getElementById('ingresoFecha').value=today;
+  document.getElementById('gastoFecha').value=today;
   cargarCategoriasSelect();
   cargarBalance();
   cargarPresupuesto();
+  // análisis filtros default = últimos 6 meses
+  const d=new Date(); d.setMonth(d.getMonth()-5);
+  document.getElementById('analDesde').value=d.toISOString().slice(0,7);
+  document.getElementById('analHasta').value=now;
 });
 
-async function cargarCategoriasSelect() {
-  try {
-    const cats = await apiFetch('/api/categorias');
-    const ingCats = cats.filter(c => c.tipo === 'ingreso');
-    const gasCats = cats.filter(c => c.tipo === 'gasto');
-    const fill = (id, items, includeTodos) => {
-      const sel = document.getElementById(id);
-      if (!sel) return;
-      sel.innerHTML = (includeTodos ? '<option value="">Todas</option>' : '') + items.map(c => `<option value="${c.nombre}">${c.nombre}</option>`).join('');
+async function apiFetch(url, options){
+  options = options || {};
+  options.headers = Object.assign({}, authHeaders(), options.headers||{});
+  const res = await fetch(url, options);
+  if(res.status===401){ logout(); throw new Error('Sesión expirada'); }
+  if(!res.ok){
+    const err=await res.json().catch(()=>({error:res.statusText}));
+    throw new Error(err.error || err.errores?.join(', ') || 'Error en la solicitud');
+  }
+  const ct=res.headers.get('content-type')||'';
+  if(ct.includes('text/csv')) return res.text();
+  return res.json();
+}
+function formatearCOP(n){ return new Intl.NumberFormat('es-CO',{style:'currency',currency:'COP',minimumFractionDigits:0}).format(n||0); }
+function showTab(id){
+  document.querySelectorAll('.view-section').forEach(s=> s.classList.add('hidden'));
+  const el=document.getElementById(id); if(el) el.classList.remove('hidden');
+  document.querySelectorAll('.tab').forEach(t=> t.classList.remove('active'));
+  const tab=document.querySelector(`[data-tab="${id}"]`); if(tab) tab.classList.add('active');
+  if(id==='view-balance') cargarBalance();
+  if(id==='view-ingresos') cargarIngresos();
+  if(id==='view-gastos') cargarGastos();
+  if(id==='view-presupuesto') cargarPresupuesto();
+  if(id==='view-categorias-reporte') cargarReporteCategorias();
+  if(id==='view-historico') cargarHistorico();
+  if(id==='view-analisis') cargarAnalisis();
+  if(id==='view-alertas') cargarAlertas();
+  if(id==='view-admin') cargarAdmin();
+}
+
+async function cargarCategoriasSelect(){
+  try{
+    const cats=await apiFetch('/api/categorias');
+    const ingCats=cats.filter(c=> c.tipo==='ingreso');
+    const gasCats=cats.filter(c=> c.tipo==='gasto');
+    const fill=(id, items, includeTodos)=>{
+      const sel=document.getElementById(id); if(!sel) return;
+      sel.innerHTML=(includeTodos?'<option value="">Todas</option>':'')+items.map(c=> `<option value="${c.nombre}">${c.nombre}</option>`).join('');
     };
-    fill('ingresoCategoria', ingCats, false);
-    fill('gastoCategoria', gasCats, false);
-    fill('filtroCatIngreso', ingCats, true);
-    fill('filtroCatGasto', gasCats, true);
-    // presupuesto categorias
-    const container = document.getElementById('presupuestoCategorias');
-    if (container) {
-      container.innerHTML = '<h3 style="margin:1rem 0 0.5rem">Asignación por categoría</h3>' + gasCats.map(c => `
-        <div class="form-group" style="display:flex;gap:0.5rem;align-items:center">
-          <label style="min-width:140px">${c.nombre}</label>
-          <input type="number" data-cat="${c.nombre}" step="0.01" min="0" placeholder="0" style="flex:1">
-        </div>`).join('');
-    }
-    // tabla categorias custom
-    const custom = cats.filter(c => !c.predefinida);
-    const tbody = document.querySelector('#tablaCategoriasCustom tbody');
-    if (tbody) tbody.innerHTML = custom.map(c => `<tr><td>${c.nombre}</td><td>${c.tipo}</td><td><button class="btn btn-danger" style="padding:0.3rem 0.6rem;font-size:0.8rem" onclick="eliminarCategoria('${c.id}')">Eliminar</button></td></tr>`).join('') || '<tr><td colspan="3" style="color:var(--muted)">Sin categorías personalizadas</td></tr>';
-  } catch(e) { console.error(e); }
+    fill('ingresoCategoria', ingCats,false);
+    fill('gastoCategoria', gasCats,false);
+    fill('filtroCatIngreso', ingCats,true);
+    fill('filtroCatGasto', gasCats,true);
+    fill('analCategoria', [...ingCats, ...gasCats], true);
+    const container=document.getElementById('presupuestoCategorias');
+    if(container) container.innerHTML='<h3 style="margin:1rem 0 0.5rem">Asignación por categoría</h3>'+gasCats.map(c=> `<div class="form-group" style="display:flex;gap:0.5rem;align-items:center"><label style="min-width:140px">${c.nombre}</label><input type="number" data-cat="${c.nombre}" step="0.01" min="0" placeholder="0" style="flex:1"></div>`).join('');
+    const custom=cats.filter(c=> !c.predefinida);
+    const tbody=document.querySelector('#tablaCategoriasCustom tbody');
+    if(tbody) tbody.innerHTML=custom.map(c=> `<tr><td>${c.nombre}</td><td>${c.tipo}</td><td><button class="btn btn-danger" style="padding:0.3rem 0.6rem;font-size:0.8rem" onclick="eliminarCategoria('${c.id}')">Eliminar</button></td></tr>`).join('') || '<tr><td colspan="3" style="color:var(--muted)">Sin categorías personalizadas</td></tr>';
+  }catch(e){ console.error(e); }
 }
 
-// ===== Balance =====
-async function cargarBalance() {
-  const periodo = getPeriodo();
-  document.getElementById('estadoPeriodo').textContent = 'Periodo: ' + periodo;
-  try {
-    const bal = await apiFetch('/api/balance?periodo=' + periodo);
-    document.getElementById('kpiIngresos').textContent = formatearCOP(bal.totalIngresos);
-    document.getElementById('kpiGastos').textContent = formatearCOP(bal.totalGastos);
-    document.getElementById('kpiSaldo').textContent = formatearCOP(bal.saldo);
-    const card = document.getElementById('kpiSaldoCard');
-    card.className = 'card kpi saldo ' + (bal.saldo >= 0 ? 'positivo' : 'negativo');
-    document.getElementById('kpiEstado').textContent = bal.estado === 'superavit' ? '✅ Superávit' : '⚠️ Déficit';
-    document.getElementById('resumenTexto').textContent = `Ingresos: ${bal.countIngresos} registros | Gastos: ${bal.countGastos} registros | Saldo: ${formatearCOP(bal.saldo)}`;
-    // recientes
-    const trans = await apiFetch('/api/reportes/transacciones?periodo=' + periodo);
-    const tbody = document.querySelector('#tablaRecientes tbody');
-    tbody.innerHTML = trans.slice(0, 8).map(t => `<tr><td>${t.fecha}</td><td><span class="badge ${t.tipo==='ingreso'?'badge-normal':'badge-danger'}">${t.tipo}</span></td><td>${t.categoria}</td><td>${t.descripcion||'-'}</td><td style="text-align:right">${formatearCOP(t.monto)}</td></tr>`).join('') || '<tr><td colspan="5" style="text-align:center;color:var(--muted)">Sin transacciones</td></tr>';
-  } catch(e) { console.error(e); }
+async function cargarBalance(){
+  const periodo=getPeriodo();
+  document.getElementById('estadoPeriodo').textContent='Periodo: '+periodo;
+  try{
+    const bal=await apiFetch('/api/balance?periodo='+periodo);
+    document.getElementById('kpiIngresos').textContent=formatearCOP(bal.totalIngresos);
+    document.getElementById('kpiGastos').textContent=formatearCOP(bal.totalGastos);
+    document.getElementById('kpiSaldo').textContent=formatearCOP(bal.saldo);
+    const card=document.getElementById('kpiSaldoCard'); card.className='card kpi saldo '+(bal.saldo>=0?'positivo':'negativo');
+    document.getElementById('kpiEstado').textContent=bal.estado==='superavit'?'✅ Superávit':'⚠️ Déficit';
+    document.getElementById('resumenTexto').textContent=`Ingresos: ${bal.countIngresos} | Gastos: ${bal.countGastos} | Saldo: ${formatearCOP(bal.saldo)}`;
+    const trans=await apiFetch('/api/reportes/transacciones?periodo='+periodo);
+    const tbody=document.querySelector('#tablaRecientes tbody');
+    tbody.innerHTML=trans.slice(0,8).map(t=> `<tr><td>${t.fecha}</td><td><span class="badge ${t.tipo==='ingreso'?'badge-normal':'badge-danger'}">${t.tipo}</span></td><td>${t.categoria}</td><td>${t.descripcion||'-'}</td><td style="text-align:right">${formatearCOP(t.monto)}</td></tr>`).join('') || '<tr><td colspan="5" style="text-align:center;color:var(--muted)">Sin transacciones</td></tr>';
+  }catch(e){ console.error(e); }
 }
 
-// ===== Ingresos =====
-async function cargarIngresos() {
-  const periodo = getPeriodo();
-  const q = document.getElementById('filtroIngreso').value || '';
-  const cat = document.getElementById('filtroCatIngreso').value || '';
-  let url = '/api/ingresos?periodo=' + periodo;
-  if (cat) url += '&categoria=' + encodeURIComponent(cat);
-  if (q) url += '&q=' + encodeURIComponent(q);
-  try {
-    const items = await apiFetch(url);
-    document.getElementById('totalIngresosList').textContent = `(${items.length})`;
-    const tbody = document.querySelector('#tablaIngresos tbody');
-    tbody.innerHTML = items.map(i => `<tr>
-      <td>${i.fecha}</td><td>${i.categoria}</td><td>${i.fuente||'-'}</td><td>${i.descripcion||'-'}</td><td style="text-align:right">${formatearCOP(i.monto)}</td>
-      <td><button class="btn btn-secondary" style="padding:0.3rem 0.6rem;font-size:0.8rem" onclick="editarIngreso('${i.id}')">Editar</button> <button class="btn btn-danger" style="padding:0.3rem 0.6rem;font-size:0.8rem" onclick="eliminarIngreso('${i.id}')">Eliminar</button></td>
-    </tr>`).join('') || '<tr><td colspan="6" style="text-align:center;color:var(--muted)">Sin ingresos</td></tr>';
-  } catch(e) { console.error(e); }
+async function cargarIngresos(){
+  const periodo=getPeriodo();
+  const q=document.getElementById('filtroIngreso').value||'';
+  const cat=document.getElementById('filtroCatIngreso').value||'';
+  let url='/api/ingresos?periodo='+periodo;
+  if(cat) url+='&categoria='+encodeURIComponent(cat);
+  if(q) url+='&q='+encodeURIComponent(q);
+  try{
+    const items=await apiFetch(url);
+    document.getElementById('totalIngresosList').textContent=`(${items.length})`;
+    const tbody=document.querySelector('#tablaIngresos tbody');
+    tbody.innerHTML=items.map(i=> `<tr><td>${i.fecha}</td><td>${i.categoria}</td><td>${i.fuente||'-'}</td><td>${i.descripcion||'-'}</td><td style="text-align:right">${formatearCOP(i.monto)}</td><td><button class="btn btn-secondary" style="padding:0.3rem 0.6rem;font-size:0.8rem" onclick="editarIngreso('${i.id}')">Editar</button> <button class="btn btn-danger" style="padding:0.3rem 0.6rem;font-size:0.8rem" onclick="eliminarIngreso('${i.id}')">Eliminar</button></td></tr>`).join('') || '<tr><td colspan="6" style="text-align:center;color:var(--muted)">Sin ingresos</td></tr>';
+  }catch(e){ console.error(e); }
 }
-async function guardarIngreso(e) {
+async function guardarIngreso(e){
   e.preventDefault();
-  const id = document.getElementById('ingresoId').value;
-  const payload = { monto: parseFloat(document.getElementById('ingresoMonto').value), fecha: document.getElementById('ingresoFecha').value, categoria: document.getElementById('ingresoCategoria').value, fuente: document.getElementById('ingresoFuente').value, descripcion: document.getElementById('ingresoDescripcion').value };
-  try {
-    if (id) await apiFetch('/api/ingresos/' + id, { method: 'PUT', headers: {'Content-Type':'application/json'}, body: JSON.stringify(payload) });
-    else await apiFetch('/api/ingresos', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify(payload) });
+  const id=document.getElementById('ingresoId').value;
+  const payload={ monto: parseFloat(document.getElementById('ingresoMonto').value), fecha: document.getElementById('ingresoFecha').value, categoria: document.getElementById('ingresoCategoria').value, fuente: document.getElementById('ingresoFuente').value, descripcion: document.getElementById('ingresoDescripcion').value };
+  try{
+    if(id) await apiFetch('/api/ingresos/'+id,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
+    else await apiFetch('/api/ingresos',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
     resetFormIngreso(); cargarIngresos(); cargarBalance();
-  } catch(err) { alert(err.message); }
+  }catch(err){ alert(err.message); }
 }
-function resetFormIngreso() { document.getElementById('formIngreso').reset(); document.getElementById('ingresoId').value=''; document.getElementById('ingresoFecha').value = new Date().toISOString().split('T')[0]; }
-async function editarIngreso(id) {
-  const item = await apiFetch('/api/ingresos/' + id);
-  document.getElementById('ingresoId').value = item.id;
-  document.getElementById('ingresoMonto').value = item.monto;
-  document.getElementById('ingresoFecha').value = item.fecha;
-  document.getElementById('ingresoCategoria').value = item.categoria;
-  document.getElementById('ingresoFuente').value = item.fuente || '';
-  document.getElementById('ingresoDescripcion').value = item.descripcion || '';
-  window.scrollTo({top:0,behavior:'smooth'});
-}
-async function eliminarIngreso(id) { if(!confirm('¿Eliminar ingreso?')) return; await apiFetch('/api/ingresos/'+id,{method:'DELETE'}); cargarIngresos(); cargarBalance(); }
+function resetFormIngreso(){ document.getElementById('formIngreso').reset(); document.getElementById('ingresoId').value=''; document.getElementById('ingresoFecha').value=new Date().toISOString().split('T')[0]; }
+async function editarIngreso(id){ const item=await apiFetch('/api/ingresos/'+id); document.getElementById('ingresoId').value=item.id; document.getElementById('ingresoMonto').value=item.monto; document.getElementById('ingresoFecha').value=item.fecha; document.getElementById('ingresoCategoria').value=item.categoria; document.getElementById('ingresoFuente').value=item.fuente||''; document.getElementById('ingresoDescripcion').value=item.descripcion||''; window.scrollTo({top:0,behavior:'smooth'}); }
+async function eliminarIngreso(id){ if(!confirm('¿Eliminar ingreso?')) return; await apiFetch('/api/ingresos/'+id,{method:'DELETE'}); cargarIngresos(); cargarBalance(); }
 
-// ===== Gastos =====
-async function cargarGastos() {
-  const periodo = getPeriodo();
-  const q = document.getElementById('filtroGasto').value || '';
-  const cat = document.getElementById('filtroCatGasto').value || '';
-  let url = '/api/gastos?periodo=' + periodo;
-  if (cat) url += '&categoria=' + encodeURIComponent(cat);
-  if (q) url += '&q=' + encodeURIComponent(q);
-  try {
-    const items = await apiFetch(url);
-    document.getElementById('totalGastosList').textContent = `(${items.length})`;
-    const tbody = document.querySelector('#tablaGastos tbody');
-    tbody.innerHTML = items.map(g => `<tr>
-      <td>${g.fecha}</td><td>${g.categoria}</td><td>${g.descripcion||'-'}</td><td style="text-align:right">${formatearCOP(g.monto)}</td>
-      <td><button class="btn btn-secondary" style="padding:0.3rem 0.6rem;font-size:0.8rem" onclick="editarGasto('${g.id}')">Editar</button> <button class="btn btn-danger" style="padding:0.3rem 0.6rem;font-size:0.8rem" onclick="eliminarGasto('${g.id}')">Eliminar</button></td>
-    </tr>`).join('') || '<tr><td colspan="5" style="text-align:center;color:var(--muted)">Sin gastos</td></tr>';
-  } catch(e) { console.error(e); }
+async function cargarGastos(){
+  const periodo=getPeriodo();
+  const q=document.getElementById('filtroGasto').value||'';
+  const cat=document.getElementById('filtroCatGasto').value||'';
+  let url='/api/gastos?periodo='+periodo;
+  if(cat) url+='&categoria='+encodeURIComponent(cat);
+  if(q) url+='&q='+encodeURIComponent(q);
+  try{
+    const items=await apiFetch(url);
+    document.getElementById('totalGastosList').textContent=`(${items.length})`;
+    const tbody=document.querySelector('#tablaGastos tbody');
+    tbody.innerHTML=items.map(g=> `<tr><td>${g.fecha}</td><td>${g.categoria}</td><td>${g.descripcion||'-'}</td><td style="text-align:right">${formatearCOP(g.monto)}</td><td><button class="btn btn-secondary" style="padding:0.3rem 0.6rem;font-size:0.8rem" onclick="editarGasto('${g.id}')">Editar</button> <button class="btn btn-danger" style="padding:0.3rem 0.6rem;font-size:0.8rem" onclick="eliminarGasto('${g.id}')">Eliminar</button></td></tr>`).join('') || '<tr><td colspan="5" style="text-align:center;color:var(--muted)">Sin gastos</td></tr>';
+  }catch(e){ console.error(e); }
 }
-async function guardarGasto(e) {
+async function guardarGasto(e){
   e.preventDefault();
-  const id = document.getElementById('gastoId').value;
-  const payload = { monto: parseFloat(document.getElementById('gastoMonto').value), fecha: document.getElementById('gastoFecha').value, categoria: document.getElementById('gastoCategoria').value, descripcion: document.getElementById('gastoDescripcion').value };
-  try {
-    if (id) await apiFetch('/api/gastos/' + id, { method: 'PUT', headers: {'Content-Type':'application/json'}, body: JSON.stringify(payload) });
-    else await apiFetch('/api/gastos', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify(payload) });
+  const id=document.getElementById('gastoId').value;
+  const payload={ monto: parseFloat(document.getElementById('gastoMonto').value), fecha: document.getElementById('gastoFecha').value, categoria: document.getElementById('gastoCategoria').value, descripcion: document.getElementById('gastoDescripcion').value };
+  try{
+    if(id) await apiFetch('/api/gastos/'+id,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
+    else await apiFetch('/api/gastos',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
     resetFormGasto(); cargarGastos(); cargarBalance();
-  } catch(err) { alert(err.message); }
+  }catch(err){ alert(err.message); }
 }
-function resetFormGasto() { document.getElementById('formGasto').reset(); document.getElementById('gastoId').value=''; document.getElementById('gastoFecha').value = new Date().toISOString().split('T')[0]; }
-async function editarGasto(id) {
-  const item = await apiFetch('/api/gastos/' + id);
-  document.getElementById('gastoId').value = item.id;
-  document.getElementById('gastoMonto').value = item.monto;
-  document.getElementById('gastoFecha').value = item.fecha;
-  document.getElementById('gastoCategoria').value = item.categoria;
-  document.getElementById('gastoDescripcion').value = item.descripcion || '';
-  window.scrollTo({top:0,behavior:'smooth'});
-}
-async function eliminarGasto(id) { if(!confirm('¿Eliminar gasto?')) return; await apiFetch('/api/gastos/'+id,{method:'DELETE'}); cargarGastos(); cargarBalance(); }
+function resetFormGasto(){ document.getElementById('formGasto').reset(); document.getElementById('gastoId').value=''; document.getElementById('gastoFecha').value=new Date().toISOString().split('T')[0]; }
+async function editarGasto(id){ const item=await apiFetch('/api/gastos/'+id); document.getElementById('gastoId').value=item.id; document.getElementById('gastoMonto').value=item.monto; document.getElementById('gastoFecha').value=item.fecha; document.getElementById('gastoCategoria').value=item.categoria; document.getElementById('gastoDescripcion').value=item.descripcion||''; window.scrollTo({top:0,behavior:'smooth'}); }
+async function eliminarGasto(id){ if(!confirm('¿Eliminar gasto?')) return; await apiFetch('/api/gastos/'+id,{method:'DELETE'}); cargarGastos(); cargarBalance(); }
 
-// ===== Presupuesto =====
-async function cargarPresupuesto() {
-  const periodo = getPeriodo();
-  document.getElementById('presupuestoPeriodo').value = periodo;
-  try {
-    const arr = await apiFetch('/api/presupuestos?periodo=' + periodo);
-    const p = arr[0];
-    const div = document.getElementById('presupuestoActual');
-    if (!p) { div.innerHTML = '<p style="color:var(--muted)">Sin presupuesto configurado para ' + periodo + '</p>'; return; }
-    document.getElementById('presupuestoTotal').value = p.presupuestoTotal;
-    // rellenar inputs
-    document.querySelectorAll('#presupuestoCategorias input[data-cat]').forEach(inp => {
-      inp.value = p.categoriasAsignadas[inp.dataset.cat] || '';
-    });
-    div.innerHTML = `<p><strong>Periodo:</strong> ${p.periodo} | <strong>Total:</strong> ${formatearCOP(p.presupuestoTotal)}</p><ul>${Object.entries(p.categoriasAsignadas).map(([k,v])=>`<li>${k}: ${formatearCOP(v)}</li>`).join('')}</ul>`;
-  } catch(e) { console.error(e); }
+async function cargarPresupuesto(){
+  const periodo=getPeriodo(); document.getElementById('presupuestoPeriodo').value=periodo;
+  try{
+    const arr=await apiFetch('/api/presupuestos?periodo='+periodo);
+    const p=arr[0]; const div=document.getElementById('presupuestoActual');
+    if(!p){ div.innerHTML='<p style="color:var(--muted)">Sin presupuesto para '+periodo+'</p>'; return; }
+    document.getElementById('presupuestoTotal').value=p.presupuestoTotal;
+    document.querySelectorAll('#presupuestoCategorias input[data-cat]').forEach(inp=> inp.value=p.categoriasAsignadas[inp.dataset.cat]||'');
+    div.innerHTML=`<p><strong>Periodo:</strong> ${p.periodo} | <strong>Total:</strong> ${formatearCOP(p.presupuestoTotal)}</p><ul>${Object.entries(p.categoriasAsignadas).map(([k,v])=>`<li>${k}: ${formatearCOP(v)}</li>`).join('')}</ul>`;
+  }catch(e){ console.error(e); }
 }
-async function guardarPresupuesto() {
-  const periodo = document.getElementById('presupuestoPeriodo').value || getPeriodo();
-  const total = parseFloat(document.getElementById('presupuestoTotal').value) || 0;
-  const categoriasAsignadas = {};
-  document.querySelectorAll('#presupuestoCategorias input[data-cat]').forEach(inp => {
-    const v = parseFloat(inp.value);
-    if (!isNaN(v) && v > 0) categoriasAsignadas[inp.dataset.cat] = v;
-  });
-  try {
-    await apiFetch('/api/presupuestos', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ periodo, presupuestoTotal: total, categoriasAsignadas }) });
-    document.getElementById('msgPresupuesto').textContent = '✅ Presupuesto guardado';
-    setTimeout(()=> document.getElementById('msgPresupuesto').textContent='', 3000);
-    cargarPresupuesto();
-  } catch(err) { alert(err.message); }
+async function guardarPresupuesto(){
+  const periodo=document.getElementById('presupuestoPeriodo').value||getPeriodo();
+  const total=parseFloat(document.getElementById('presupuestoTotal').value)||0;
+  const categoriasAsignadas={};
+  document.querySelectorAll('#presupuestoCategorias input[data-cat]').forEach(inp=>{ const v=parseFloat(inp.value); if(!isNaN(v)&&v>0) categoriasAsignadas[inp.dataset.cat]=v; });
+  try{ await apiFetch('/api/presupuestos',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({periodo, presupuestoTotal:total, categoriasAsignadas})}); document.getElementById('msgPresupuesto').textContent='✅ Guardado'; setTimeout(()=> document.getElementById('msgPresupuesto').textContent='',3000); cargarPresupuesto(); }catch(err){ alert(err.message); }
 }
 
-// ===== Reporte categorías =====
-async function cargarReporteCategorias() {
-  const periodo = getPeriodo();
-  try {
-    const rep = await apiFetch('/api/reportes/categorias?periodo=' + periodo);
-    // tabla
-    const tbody = document.querySelector('#tablaCategorias tbody');
-    const cats = Object.keys(rep.porCategoria);
-    if (!cats.length) { tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--muted)">Sin gastos en este periodo</td></tr>'; drawPieChart('pieChart', {}); return; }
-    tbody.innerHTML = cats.map(cat => {
-      const gastado = rep.porCategoria[cat];
-      const porc = rep.porcentajes[cat] || 0;
-      const ejec = rep.ejecucion[cat] || { presupuestado: 0, ejecutado: gastado, porcentaje: 0 };
-      let estado = 'normal';
-      let badge = '<span class="badge badge-normal">Normal</span>';
-      let barClass = 'bar-normal';
-      if (ejec.presupuestado > 0) {
-        if (ejec.porcentaje >= 1) { estado='excedido'; badge='<span class="badge badge-danger">Excedido</span>'; barClass='bar-danger'; }
-        else if (ejec.porcentaje >= 0.8) { estado='advertencia'; badge='<span class="badge badge-warning">Advertencia</span>'; barClass='bar-warning'; }
-      }
-      const width = ejec.presupuestado > 0 ? Math.min(ejec.porcentaje*100, 100) : 0;
-      return `<tr>
-        <td>${cat}</td><td style="text-align:right">${formatearCOP(gastado)}</td><td style="text-align:right">${ejec.presupuestado?formatearCOP(ejec.presupuestado):'-'}</td>
-        <td style="text-align:right">${(porc*100).toFixed(1)}%</td><td style="text-align:right">${ejec.presupuestado?(ejec.porcentaje*100).toFixed(1)+'%':'-'}</td>
-        <td>${badge}</td><td><div class="bar-container"><div class="bar-fill ${barClass}" style="width:${width}%"></div></div></td>
-      </tr>`;
+async function cargarReporteCategorias(){
+  const periodo=getPeriodo();
+  try{
+    const rep=await apiFetch('/api/reportes/categorias?periodo='+periodo);
+    const tbody=document.querySelector('#tablaCategorias tbody');
+    const cats=Object.keys(rep.porCategoria);
+    if(!cats.length){ tbody.innerHTML='<tr><td colspan="7" style="text-align:center;color:var(--muted)">Sin gastos</td></tr>'; drawPieChart('pieChart',{}); return; }
+    tbody.innerHTML=cats.map(cat=>{
+      const gastado=rep.porCategoria[cat]; const porc=rep.porcentajes[cat]||0; const ejec=rep.ejecucion[cat]||{presupuestado:0,ejecutado:gastado,porcentaje:0};
+      let badge='<span class="badge badge-normal">Normal</span>'; let barClass='bar-normal';
+      if(ejec.presupuestado>0){ if(ejec.porcentaje>=1){ badge='<span class="badge badge-danger">Excedido</span>'; barClass='bar-danger'; } else if(ejec.porcentaje>=0.8){ badge='<span class="badge badge-warning">Advertencia</span>'; barClass='bar-warning'; } }
+      const width=ejec.presupuestado>0? Math.min(ejec.porcentaje*100,100):0;
+      return `<tr><td>${cat}</td><td style="text-align:right">${formatearCOP(gastado)}</td><td style="text-align:right">${ejec.presupuestado?formatearCOP(ejec.presupuestado):'-'}</td><td style="text-align:right">${(porc*100).toFixed(1)}%</td><td style="text-align:right">${ejec.presupuestado?(ejec.porcentaje*100).toFixed(1)+'%':'-'}</td><td>${badge}</td><td><div class="bar-container"><div class="bar-fill ${barClass}" style="width:${width}%"></div></div></td></tr>`;
     }).join('');
-    drawPieChart('pieChart', rep.porCategoria);
-    // bar chart
-    const labels = cats;
-    const values = cats.map(c => rep.porCategoria[c]);
-    drawBarChart('barChart', labels, values, Math.max(...values, 1));
-  } catch(e) { console.error(e); }
+    drawPieChart('pieChart',rep.porCategoria);
+    const labels=cats; const values=cats.map(c=> rep.porCategoria[c]);
+    drawBarChart('barChart', labels, values, Math.max(...values,1));
+  }catch(e){ console.error(e); }
 }
 
-// ===== Histórico =====
-async function cargarHistorico() {
-  const periodo = document.getElementById('histPeriodo').value || getPeriodo();
-  const comparar = document.getElementById('histComparar').value;
-  try {
-    let url = '/api/reportes/historico?periodo=' + periodo;
-    if (comparar) url += '&comparar=' + comparar;
-    const data = await apiFetch(url);
-    const div = document.getElementById('historicoResultado');
-    if (data.actual && data.comparacion) {
-      div.innerHTML = `
-        <div class="grid">
-          <div class="card"><h3>${data.actual.periodo}</h3><p>Ingresos: ${formatearCOP(data.actual.totalIngresos)}</p><p>Gastos: ${formatearCOP(data.actual.totalGastos)}</p><p><strong>Saldo: ${formatearCOP(data.actual.saldo)}</strong></p></div>
-          <div class="card"><h3>${data.comparacion.periodo}</h3><p>Ingresos: ${formatearCOP(data.comparacion.totalIngresos)}</p><p>Gastos: ${formatearCOP(data.comparacion.totalGastos)}</p><p><strong>Saldo: ${formatearCOP(data.comparacion.saldo)}</strong></p></div>
-        </div>
-        <p style="margin-top:0.8rem"><strong>Diferencia saldo:</strong> ${formatearCOP(data.actual.saldo - data.comparacion.saldo)}</p>`;
-    } else if (data.periodo) {
-      div.innerHTML = `<p><strong>Periodo:</strong> ${data.periodo}</p><p>Ingresos: ${formatearCOP(data.totalIngresos)} | Gastos: ${formatearCOP(data.totalGastos)} | Saldo: ${formatearCOP(data.saldo)}</p><pre style="background:#f1f3f4;padding:0.8rem;border-radius:8px;overflow:auto">${JSON.stringify(data.porCategoria, null, 2)}</pre>`;
-    } else {
-      div.innerHTML = '<p style="color:var(--muted)">Sin datos</p>';
+async function cargarHistorico(){
+  const periodo=document.getElementById('histPeriodo').value||getPeriodo();
+  const comparar=document.getElementById('histComparar').value;
+  try{
+    let url='/api/reportes/historico?periodo='+periodo; if(comparar) url+='&comparar='+comparar;
+    const data=await apiFetch(url);
+    const div=document.getElementById('historicoResultado');
+    if(data.actual&&data.comparacion) div.innerHTML=`<div class="grid"><div class="card"><h3>${data.actual.periodo}</h3><p>Ingresos: ${formatearCOP(data.actual.totalIngresos)}</p><p>Gastos: ${formatearCOP(data.actual.totalGastos)}</p><p><strong>Saldo: ${formatearCOP(data.actual.saldo)}</strong></p></div><div class="card"><h3>${data.comparacion.periodo}</h3><p>Ingresos: ${formatearCOP(data.comparacion.totalIngresos)}</p><p>Gastos: ${formatearCOP(data.comparacion.totalGastos)}</p><p><strong>Saldo: ${formatearCOP(data.comparacion.saldo)}</strong></p></div></div><p style="margin-top:0.8rem"><strong>Diferencia:</strong> ${formatearCOP(data.actual.saldo-data.comparacion.saldo)}</p>`;
+    else if(data.periodo) div.innerHTML=`<p><strong>${data.periodo}</strong> — Ingresos: ${formatearCOP(data.totalIngresos)} | Gastos: ${formatearCOP(data.totalGastos)} | Saldo: ${formatearCOP(data.saldo)}</p>`;
+    else div.innerHTML='<p style="color:var(--muted)">Sin datos</p>';
+    const tend=await apiFetch('/api/reportes/historico');
+    const tDiv=document.getElementById('tendencias');
+    if(!tend.resumenes||!tend.resumenes.length) tDiv.innerHTML='<p style="color:var(--muted)">Sin datos</p>';
+    else tDiv.innerHTML='<table><thead><tr><th>Periodo</th><th style="text-align:right">Ingresos</th><th style="text-align:right">Gastos</th><th style="text-align:right">Saldo</th></tr></thead><tbody>'+tend.resumenes.map(r=> `<tr><td>${r.periodo}</td><td style="text-align:right">${formatearCOP(r.totalIngresos)}</td><td style="text-align:right">${formatearCOP(r.totalGastos)}</td><td style="text-align:right">${formatearCOP(r.saldo)}</td></tr>`).join('')+'</tbody></table>';
+  }catch(e){ console.error(e); }
+}
+
+// ANALISIS
+async function cargarAnalisis(){
+  const desde=document.getElementById('analDesde').value;
+  const hasta=document.getElementById('analHasta').value;
+  const categoria=document.getElementById('analCategoria').value;
+  const vista=document.getElementById('analVista').value;
+  let url='/api/analisis?';
+  if(desde) url+='desde='+desde+'&';
+  if(hasta) url+='hasta='+hasta+'&';
+  if(categoria) url+='categoria='+encodeURIComponent(categoria)+'&';
+  try{
+    const data=await apiFetch(url);
+    document.getElementById('analIngresos').textContent=formatearCOP(data.totalIngresos);
+    document.getElementById('analGastos').textContent=formatearCOP(data.totalGastos);
+    document.getElementById('analSaldo').textContent=formatearCOP(data.saldo);
+    document.getElementById('analSaldoCard').className='card kpi saldo '+(data.saldo>=0?'positivo':'negativo');
+    document.getElementById('analResumen').textContent=data.serieMensual.length+' meses | '+(data.ingresos?data.ingresos.length:0)+' ingresos, '+(data.gastos?data.gastos.length:0)+' gastos';
+    const showIng = vista!=='gastos';
+    const showGas = vista!=='ingresos';
+    document.getElementById('analIngresosSection').style.display=showIng?'block':'none';
+    document.getElementById('analGastosSection').style.display=showGas?'block':'none';
+    // Ingresos
+    if(showIng){
+      const ingLabels=Object.keys(data.porCatIngresos);
+      const ingValues=ingLabels.map(k=> data.porCatIngresos[k]);
+      drawBarChart('analBarIngresos', ingLabels, ingValues);
+      drawPieChart('analPieIngresos', data.porCatIngresos);
+      const lineLabels=data.serieMensual.map(s=> s.periodo);
+      const lineIng=data.serieMensual.map(s=> s.ingresos);
+      drawLineChart('analLineIngresos', lineLabels, [{label:'Ingresos', values: lineIng, color:'#2e7d32'}]);
     }
-    // tendencias
-    const tend = await apiFetch('/api/reportes/historico');
-    const tDiv = document.getElementById('tendencias');
-    if (!tend.resumenes || !tend.resumenes.length) tDiv.innerHTML = '<p style="color:var(--muted)">Sin datos históricos</p>';
-    else {
-      tDiv.innerHTML = '<table><thead><tr><th>Periodo</th><th style="text-align:right">Ingresos</th><th style="text-align:right">Gastos</th><th style="text-align:right">Saldo</th></tr></thead><tbody>' +
-        tend.resumenes.map(r => `<tr><td>${r.periodo}</td><td style="text-align:right">${formatearCOP(r.totalIngresos)}</td><td style="text-align:right">${formatearCOP(r.totalGastos)}</td><td style="text-align:right">${formatearCOP(r.saldo)}</td></tr>`).join('') + '</tbody></table>';
+    // Gastos
+    if(showGas){
+      const gasLabels=Object.keys(data.porCatGastos);
+      const gasValues=gasLabels.map(k=> data.porCatGastos[k]);
+      drawBarChart('analBarGastos', gasLabels, gasValues);
+      drawPieChart('analPieGastos', data.porCatGastos);
+      const lineLabels=data.serieMensual.map(s=> s.periodo);
+      const lineGas=data.serieMensual.map(s=> s.gastos);
+      drawLineChart('analLineGastos', lineLabels, [{label:'Gastos', values: lineGas, color:'#c62828'}]);
     }
-  } catch(e) { console.error(e); }
+    // Comparativo
+    const compLabels=data.serieMensual.map(s=> s.periodo);
+    const compIng=data.serieMensual.map(s=> s.ingresos);
+    const compGas=data.serieMensual.map(s=> s.gastos);
+    drawLineChart('analLineComparativo', compLabels, [{label:'Ingresos', values: compIng, color:'#2e7d32'},{label:'Gastos', values: compGas, color:'#c62828'}]);
+    drawBarChart('analBarComparativo', compLabels, compGas, Math.max(...compIng, ...compGas, 1));
+  }catch(e){ console.error(e); }
 }
+function resetAnalisis(){ document.getElementById('analDesde').value=''; document.getElementById('analHasta').value=''; document.getElementById('analCategoria').value=''; document.getElementById('analVista').value='todo'; cargarAnalisis(); }
 
-// ===== Alertas =====
-async function cargarAlertas() {
-  const periodo = getPeriodo();
-  try {
-    const alertas = await apiFetch('/api/alertas?periodo=' + periodo);
-    const div = document.getElementById('listaAlertas');
-    if (!alertas.length) div.innerHTML = '<p style="color:var(--success)">✅ Sin alertas — presupuesto bajo control</p>';
-    else div.innerHTML = alertas.map(a => `<div class="alert ${a.nivel==='error'?'alert-danger':'alert-warning'}">${a.mensaje}</div>`).join('');
-  } catch(e) { console.error(e); }
+async function cargarAlertas(){
+  const periodo=getPeriodo();
+  try{
+    const alertas=await apiFetch('/api/alertas?periodo='+periodo);
+    const div=document.getElementById('listaAlertas');
+    if(!alertas.length) div.innerHTML='<p style="color:var(--success)">✅ Sin alertas</p>';
+    else div.innerHTML=alertas.map(a=> `<div class="alert ${a.nivel==='error'?'alert-danger':'alert-warning'}">${a.mensaje}</div>`).join('');
+  }catch(e){ console.error(e); }
 }
-
-// ===== Categorías custom =====
-async function crearCategoria(e) {
+async function crearCategoria(e){
   e.preventDefault();
-  const nombre = document.getElementById('catNombre').value.trim();
-  const tipo = document.getElementById('catTipo').value;
-  try {
-    await apiFetch('/api/categorias', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ nombre, tipo }) });
-    document.getElementById('catNombre').value='';
-    cargarCategoriasSelect();
-  } catch(err) { alert(err.message); }
+  const nombre=document.getElementById('catNombre').value.trim();
+  const tipo=document.getElementById('catTipo').value;
+  try{ await apiFetch('/api/categorias',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({nombre,tipo})}); document.getElementById('catNombre').value=''; cargarCategoriasSelect(); }catch(err){ alert(err.message); }
 }
-async function eliminarCategoria(id) {
-  if(!confirm('¿Eliminar categoría?')) return;
-  try { await apiFetch('/api/categorias/'+id, {method:'DELETE'}); cargarCategoriasSelect(); } catch(err){ alert(err.message); }
-}
+async function eliminarCategoria(id){ if(!confirm('¿Eliminar?')) return; try{ await apiFetch('/api/categorias/'+id,{method:'DELETE'}); cargarCategoriasSelect(); }catch(err){ alert(err.message); } }
 
-// ===== Config =====
-function exportar(tipo) { window.location.href = '/api/export/' + tipo; }
-async function hacerBackup() {
-  try { const r = await apiFetch('/api/backup', {method:'POST'}); document.getElementById('msgConfig').textContent = '✅ ' + r.message + ': ' + r.file; } catch(e){ alert(e.message); }
+function exportar(tipo){ const t=getToken(); window.location.href='/api/export/'+tipo+'?token='+encodeURIComponent(t); }
+async function hacerBackup(){ try{ const r=await apiFetch('/api/backup',{method:'POST'}); document.getElementById('msgConfig').textContent='✅ '+r.message; }catch(e){ alert(e.message); } }
+async function cambiarClave(e){
+  e.preventDefault();
+  const currentPassword=document.getElementById('claveActual').value;
+  const newPassword=document.getElementById('claveNueva').value;
+  try{ await apiFetch('/api/auth/change-password',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({currentPassword,newPassword})}); document.getElementById('msgClave').textContent='✅ Clave actualizada'; document.getElementById('msgClave').style.color='var(--success)'; }catch(err){ document.getElementById('msgClave').textContent='❌ '+err.message; document.getElementById('msgClave').style.color='var(--danger)'; }
+}
+function aplicarTema(v){ if(v==='oscuro') document.body.classList.add('dark'); else document.body.classList.remove('dark'); localStorage.setItem('sbh_tema',v); }
+function aplicarColorPrimario(v){ document.documentElement.style.setProperty('--primary', v); localStorage.setItem('sbh_color',v); }
+
+// Admin
+async function cargarAdmin(){
+  if(!currentUser||currentUser.role!=='admin') return;
+  try{
+    const users=await apiFetch('/api/admin/usuarios');
+    const tbody=document.querySelector('#tablaAdminUsuarios tbody');
+    tbody.innerHTML=users.map(u=> `<tr><td>${u.id}</td><td>${u.username}</td><td>${u.displayName}</td><td><span class="badge ${u.role==='admin'?'badge-danger':'badge-normal'}">${u.role}</span></td><td><button class="btn btn-secondary" style="padding:0.2rem 0.5rem;font-size:0.8rem" onclick="adminResetPass(${u.id})">Reset clave</button> <button class="btn btn-danger" style="padding:0.2rem 0.5rem;font-size:0.8rem" onclick="adminEliminar(${u.id})">Eliminar</button></td></tr>`).join('');
+    const backs=await apiFetch('/api/admin/backups');
+    const tb2=document.querySelector('#tablaBackups tbody');
+    tb2.innerHTML=backs.map(b=> `<tr><td>${b.file}</td><td>${new Date(b.date).toLocaleString('es-CO')}</td></tr>`).join('') || '<tr><td colspan="2" style="color:var(--muted)">Sin backups</td></tr>';
+  }catch(e){ console.error(e); }
+}
+async function adminCrearUsuario(e){
+  e.preventDefault();
+  const username=document.getElementById('adminUser').value.trim();
+  const displayName=document.getElementById('adminDisplay').value.trim();
+  const password=document.getElementById('adminPass').value;
+  const role=document.getElementById('adminRole').value;
+  try{ await apiFetch('/api/admin/usuarios',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({username,displayName,password,role})}); document.getElementById('msgAdmin').textContent='✅ Usuario creado'; cargarAdmin(); }catch(err){ document.getElementById('msgAdmin').textContent='❌ '+err.message; }
+}
+async function adminEliminar(id){ if(!confirm('¿Eliminar usuario '+id+'?')) return; try{ await apiFetch('/api/admin/usuarios/'+id,{method:'DELETE'}); cargarAdmin(); }catch(err){ alert(err.message); } }
+async function adminResetPass(id){ const np=prompt('Nueva clave (mín 6, 1 mayúscula y 1 número):'); if(!np) return; try{ await apiFetch('/api/admin/usuarios/'+id+'/reset-password',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({newPassword:np})}); alert('Clave restablecida'); }catch(err){ alert(err.message); } }
+async function adminCrearBackup(){ try{ const r=await apiFetch('/api/admin/backup',{method:'POST'}); alert(r.message+': '+r.file); cargarAdmin(); }catch(e){ alert(e.message); } }
+async function adminGuardarConfig(){
+  const tema=document.getElementById('adminTema').value;
+  const colorPrimario=document.getElementById('adminColor').value;
+  const colorFondo=document.getElementById('adminFondo').value;
+  try{ await apiFetch('/api/admin/config',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({tema,colorPrimario,colorFondo})}); document.getElementById('msgAdminConfig').textContent='✅ Guardado'; }catch(e){ alert(e.message); }
 }
 </script>
 </body>
